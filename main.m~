@@ -1,0 +1,45 @@
+%% Load STL mesh
+% Stereolithography (STL) files are a common format for storing mesh data. STL
+% meshes are simply a collection of triangular faces. This type of model is very
+% suitable for use with MATLAB's PATCH graphics object.
+
+% Import an STL mesh, returning a PATCH-compatible face-vertex structure
+index = randi([1,10],1)
+fv = stlread('models/cat.stl');
+figure
+
+%% 
+fv.vertices(:,3) = 0;
+vertices=fv.vertices;
+fv.vertices(:,2) = vertices(:,3);
+fv.vertices(:,3) = vertices(:,2);
+
+fvmodified = fv;
+
+indOffset = rand(size(fv.vertices,1),1);
+indOffset = (indOffset - 0.5) * 2;
+fvmodified.vertices(:,2)=fvmodified.vertices(:,2) + indOffset;
+
+faceOffset = (rand(size(fvmodified.faces,1),1) - 0.5) * 10;
+for idx = 1:size(fvmodified.faces,1)
+    idxList = fvmodified.faces(idx,:);
+    fvmodified.vertices(idxList,2) = fvmodified.vertices(idxList,2) + faceOffset(idx);
+end
+
+figure;
+patch(fvmodified,'FaceColor',       [rand, rand, rand], ...
+         'EdgeColor',       'none',        ...
+         'FaceLighting',    'gouraud',     ...
+         'AmbientStrength', 0.15);
+     
+% Add a cameindOffset light, and tone down the specular highlighting
+camlight('headlight');
+material('dull');
+
+% xlim([-1 1])
+% ylim([-1 1])
+% zlim([min(fvmodified.vertices(:,3)) max(fvmodified.vertices(:,3))]);
+axis off;
+
+view(randi([-180,180]),randi([-180,180]));
+rotate3d on
